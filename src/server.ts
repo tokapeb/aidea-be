@@ -4,7 +4,13 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import errorHandler from './middleware/error';
 
-dotenv.config({ path: __dirname + '/configs/config.env' });
+const env = process.env.NODE_ENV || 'production';
+
+console.log('env: ', env);
+
+if (env === 'development' || env === 'local') {
+  dotenv.config({ path: __dirname + '/configs/config.env' });
+}
 
 const app = express();
 
@@ -14,16 +20,14 @@ app.use('/api/v1/auth', authRoutes);
 
 app.use(errorHandler);
 
-const port = process.env.PORT || 5001;
+const port = parseInt(process.env.PORT || '5001');
 
-app.get('/', (req: Request, res: Response) => {
-  return res.json({ message: 'Hello world.' });
+app.get('/health', (req: Request, res: Response) => {
+  return res.status(200).send('OK');
 });
 
-const server = app.listen(port, () => {
-  console.log(
-    `Server is running and listening to http://localhost:${port} buddy.`
-  );
+const server = app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running and listening to http://localhost:${port}.`);
 });
 
 process.on('unhandledRejection', (err: Error) => {
